@@ -19,7 +19,7 @@ import streamlit as st
 
 API = os.environ.get("RK_API_URL", "").rstrip("/")
 INDIGO, CORAL, GREEN, AMBER, RED, GREY = "#4338CA", "#F2613F", "#15803D", "#B45309", "#B91C1C", "#64748B"
-POLARITY = {"opportunity": ("Opportunity", GREEN), "risk": ("Risk", RED), "info": ("Info", GREY)}
+POLARITY = {"opportunity": ("Opportunities", GREEN), "risk": ("Risk", RED), "info": ("Info", GREY)}
 BAND = {"LOW": ("Low", GREEN), "MEDIUM": ("Moderate", AMBER), "HIGH": ("High", RED), "CRITICAL": ("Very high", RED)}
 
 st.set_page_config(page_title="Reckonant · Dashboard", page_icon="◆", layout="wide")

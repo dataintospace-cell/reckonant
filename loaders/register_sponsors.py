@@ -227,7 +227,7 @@ def make_views(con):
     S = I(SCHEMA)
     nm = name_column(cols) if cols else None
     con.execute(sql.SQL("DROP VIEW IF EXISTS {s}.v_sponsor_search").format(s=S))
-    con.execute(sql.SQL("DROP VIEW IF EXISTS {s}.v_sponsor").format(s=S))
+    con.execute(sql.SQL("DROP VIEW IF EXISTS {s}.v_sponsor CASCADE").format(s=S))
     con.execute(sql.SQL('''CREATE VIEW {s}.v_sponsor AS SELECT {c}, f.url AS url FROM {s}.sponsor d
         LEFT JOIN LATERAL (SELECT url FROM {s}.file_snapshot ORDER BY snapshot_id DESC LIMIT 1) f ON true''').format(
         s=S, c=sql.SQL(", ").join(sql.SQL("d.{}").format(I(c)) for c in FIXED + cols)))

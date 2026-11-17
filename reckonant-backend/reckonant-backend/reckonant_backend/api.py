@@ -52,6 +52,8 @@ async def lifespan(_app):
 
 app = FastAPI(title="Reckonant data API", version="1.0", lifespan=lifespan)
 app.add_middleware(GZipMiddleware, minimum_size=2000)
+from rk_admin import router as admin_router   # Admin screens: /admin/ and /admin/details
+app.include_router(admin_router)
 
 
 class Store:

@@ -1,0 +1,20 @@
+# Python caches
+__pycache__/
+*.pyc
+# Local backups, logs and data
+*.bak
+logs/
+data/
+
+# Generated workbooks
+*.xlsx
+
+# Secrets and local settings
+.env
+pgpass.conf
+*.lock
+
+# Windows and editor files
+desktop.ini
+.DS_Store
+.vscode/

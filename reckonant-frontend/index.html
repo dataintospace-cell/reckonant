@@ -1,0 +1,653 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reckonant</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%236366F1'/%3E%3Cstop offset='.5' stop-color='%238B5CF6'/%3E%3Cstop offset='1' stop-color='%23F2613F'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='9' fill='url(%23g)'/%3E%3Cpath d='M10 24V9h7a5 5 0 0 1 0 10h-7M17 19l6 5' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<style>
+:root{
+  --ink:#0F172A; --muted:#64748B; --line:#E2E8F0; --bg:#F8FAFC; --card:#FFFFFF; --soft:#F1F5F9;
+  --indigo:#4338CA; --indigo2:#6366F1; --coral:#F2613F;
+  --green:#15803D; --green-bg:#DCFCE7; --amber:#B45309; --amber-bg:#FFFBEB; --amber-line:#D97706;
+  --red:#B91C1C; --red-bg:#FEE2E2; --dark-red:#7F1D1D; --grey:#475569; --grey-bg:#F1F5F9;
+  --r:14px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --ink:#E2E8F0; --muted:#94A3B8; --line:#1E293B; --bg:#0B1120; --card:#111A2E; --soft:#1A2440; --indigo:#A5B4FC; --indigo2:#818CF8; --green-bg:#052E16; --green:#86EFAC; --amber:#FCD34D; --amber-bg:#2A1F05; --red-bg:#3B0A0A; --red:#FCA5A5; --dark-red:#FECACA; --grey:#CBD5E1; --grey-bg:#1E293B; }
+}
+:root[data-theme="dark"]{ --ink:#E2E8F0; --muted:#94A3B8; --line:#1E293B; --bg:#0B1120; --card:#111A2E; --soft:#1A2440; --indigo:#A5B4FC; --indigo2:#818CF8; --green-bg:#052E16; --green:#86EFAC; --amber:#FCD34D; --amber-bg:#2A1F05; --red-bg:#3B0A0A; --red:#FCA5A5; --dark-red:#FECACA; --grey:#CBD5E1; --grey-bg:#1E293B; }
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+body{min-height:100vh}
+a{color:var(--indigo);text-decoration:none} a:hover{text-decoration:underline}
+header.top{position:sticky;top:0;z-index:5;background:var(--card);border-bottom:1px solid var(--line)}
+.wrap{max-width:1280px;margin:0 auto;padding:0 16px}
+.bar{display:flex;align-items:center;gap:12px 18px;min-height:60px;flex-wrap:wrap;padding:8px 0}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px;color:var(--ink)}
+.brand:hover{text-decoration:none}
+.logo{width:28px;height:28px;border-radius:9px;background:linear-gradient(135deg,#6366F1,#8B5CF6 50%,#F2613F);display:grid;place-items:center;color:#fff;font-weight:800;font-size:14px}
+nav{display:flex;gap:2px;flex-wrap:wrap}
+nav a,nav span{padding:7px 11px;border-radius:10px;color:var(--muted);font-weight:600;white-space:nowrap}
+nav a:hover{background:var(--soft);color:var(--indigo);text-decoration:none}
+nav a.on{background:var(--soft);color:var(--indigo)}
+nav span{color:#94A3B8;cursor:not-allowed}
+.status{margin-left:auto;color:var(--muted);font-size:12px;text-align:right}
+.status .ok{color:var(--green)} .status .bad{color:var(--red)}
+main{padding:22px 0 56px}
+h1{font-size:22px;margin:0 0 4px;letter-spacing:-.01em}
+h2{font-size:15px;margin:0 0 12px;letter-spacing:-.005em}
+.sub{color:var(--muted);margin:0 0 16px}
+.grid{display:grid;gap:14px}
+.k4{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.two{grid-template-columns:1fr}
+@media(min-width:900px){.two{grid-template-columns:1fr 1fr}}
+.block{margin-top:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;min-width:0}
+.kpi .v{font-size:24px;font-weight:700;color:var(--indigo);letter-spacing:-.01em}
+.kpi .l{color:var(--muted);font-size:12px;margin-top:2px}
+.pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap}
+.p-opp{background:var(--green-bg);color:var(--green)}
+.p-risk{background:var(--red-bg);color:var(--red)}
+.p-info{background:var(--grey-bg);color:var(--grey)}
+.b-LOW{background:var(--green-bg);color:var(--green)}
+.b-MEDIUM{background:var(--amber-bg);color:var(--amber)}
+.b-HIGH{background:var(--red-bg);color:var(--red)}
+.b-CRITICAL{background:var(--red);color:#fff}
+.b-UNKNOWN{background:var(--grey-bg);color:var(--grey)}
+.dev{display:inline-block;padding:2px 9px;border-radius:999px;border:1px dashed var(--amber-line);color:var(--amber);background:var(--amber-bg);font-size:12px;font-weight:600;white-space:nowrap}
+.devbox{border:1px dashed var(--amber-line);background:var(--amber-bg);color:var(--amber);border-radius:12px;padding:14px;text-align:center;font-weight:600}
+.empty{color:var(--muted);padding:6px 0}
+.note{color:var(--muted);font-size:12px;margin-top:10px}
+table{width:100%;border-collapse:collapse}
+th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+td.n,th.n{text-align:right;white-space:nowrap}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+tr.row{cursor:pointer} tr.row:hover td{background:var(--soft)}
+.muted{color:var(--muted)} .small{font-size:12px}
+input,select{font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);min-width:0}
+input{flex:1 1 220px}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 4px}
+.chip{border:1px solid var(--line);border-radius:999px;padding:4px 11px;background:var(--card);color:var(--ink);cursor:pointer;font-size:13px}
+.chip.on{background:var(--indigo);border-color:var(--indigo);color:#fff}
+.btn{font:inherit;border:1px solid var(--line);background:var(--card);color:var(--indigo);border-radius:10px;padding:8px 14px;cursor:pointer;font-weight:600}
+.btn:hover{background:var(--soft)}
+.barrow{display:grid;grid-template-columns:minmax(90px,1fr) 2fr auto;gap:10px;align-items:center;margin:8px 0}
+.barrow .lab{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.track{height:8px;background:var(--soft);border-radius:999px;overflow:hidden}
+.fill{height:100%;background:var(--indigo2);border-radius:999px}
+.fill.g{background:var(--green)} .fill.r{background:var(--red)} .fill.s{background:#94A3B8}
+ul.list{list-style:none;padding:0;margin:0}
+ul.list li{padding:10px 0;border-bottom:1px solid var(--line)}
+ul.list li:last-child{border-bottom:0}
+.err{background:var(--red-bg);border:1px solid var(--red);color:var(--red);padding:12px 14px;border-radius:12px;margin-bottom:14px}
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px 18px;margin:0}
+.kv dt{font-size:12px;color:var(--muted)}
+.kv dd{margin:2px 0 0;font-weight:600;overflow-wrap:anywhere}
+.head{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;justify-content:space-between}
+.head h1{overflow-wrap:anywhere}
+.scores{display:flex;gap:10px;flex-wrap:wrap}
+.score{text-align:center;min-width:120px;border:1px solid var(--line);border-radius:14px;padding:10px 14px;background:var(--card)}
+.score .n{font-size:26px;font-weight:800;color:var(--indigo);line-height:1.1}
+.score .t{font-size:12px;color:var(--muted)}
+.tiles{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));margin-bottom:14px}
+.tile{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--soft)}
+.tile .v{font-size:20px;font-weight:700}
+.tile .l{font-size:12px;color:var(--muted)}
+.back{display:inline-block;margin-bottom:10px;font-weight:600}
+.stack{display:flex;flex-direction:column;gap:14px}
+.stat-line{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid var(--line)}
+.stat-line:last-child{border-bottom:0}
+@media(max-width:640px){
+  .status{display:none}
+  nav a,nav span{padding:6px 8px;font-size:13px}
+  h1{font-size:19px}
+  th,td{padding:8px 6px}
+  .score{min-width:0;flex:1}
+  .card{padding:14px}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap bar">
+    <a class="brand" href="#/"><span class="logo">◆</span>Reckonant</a>
+    <nav aria-label="Main">
+      <a href="#/" data-p="">Dashboard</a>
+      <a href="#/companies" data-p="companies">Companies</a>
+      <a href="#/signals" data-p="signals">Signals</a>
+      <a href="#/tenders" data-p="tenders">Tenders</a>
+      <a href="#/data" data-p="data">Data</a>
+      <span title="Under development">Watchlist</span>
+      <span title="Under development">Export</span>
+    </nav>
+    <div class="status" id="status">Connecting…</div>
+  </div>
+</header>
+<main>
+  <div class="wrap">
+    <div id="banner"></div>
+    <div id="app"><p class="empty">Loading…</p></div>
+  </div>
+</main>
+
+<script>
+/* Reckonant front end. Reads the Reckonant data API (api.py). Nothing here changes the data.
+   API base: same origin by default. To point it elsewhere, define window.RK_API_BASE in a script tag
+   placed before this one, with the data API's address as its value. */
+const API = (window.RK_API_BASE || "").replace(/\/$/, "");
+
+// Sections the backend does not provide yet are shown as "Under development".
+const NOT_BUILT = [
+  "Financial health: turnover, growth, margins, ratios, charges and CCJs (needs Companies House accounts)",
+  "Decision-maker contacts (contact details are switched off in the app)",
+  "Watchlist, notes and follow-ups",
+  "Sign-in and saved workspace",
+  "Exports"
+];
+
+const REGISTER_NAMES = {
+  "COM-01": "Companies House", "CQC-01": "CQC Care Directory", "CQC-02": "CQC Care Directory (filters)",
+  "CQC-03": "CQC Ratings", "CQC-04": "CQC Deactivated Locations", "INS-00": "Gazette", "INS-01": "Gazette personal notices",
+  "INS-02": "Gazette corporate notices", "GAZ-01": "Gazette other notices", "HMD-01": "HMRC Tax defaulters",
+  "HOS-01": "Home Office sponsor register", "CON-01": "Contracts Finder", "FTS-01": "Find a Tender",
+  "PTR-01": "Payments Transparency"
+};
+
+const SIGNAL_LABELS = {
+  contract_win: "Contract won", contract_ending: "Contract ending soon", new_location: "New care location",
+  sponsor_licence: "New visa sponsor licence", rating_up: "CQC rating improved", new_director: "New director",
+  ownership_change: "Ownership change", public_payment: "Public-sector payment", new_company: "Newly incorporated",
+  address_change: "Moved address", company_change: "Company record changed", director_left: "Director left",
+  insolvency_notice: "Insolvency notice", hmrc_default: "HMRC tax defaulter", director_insolvency: "Director personal insolvency",
+  rating_down: "CQC rating fell", rated_inadequate: "Rated Inadequate by CQC", sponsor_lost: "Sponsor licence lost or downgraded",
+  location_closed: "Care location closed", status_change: "Company status changed"
+};
+
+const BAND_LABEL = { LOW: "Low", MEDIUM: "Moderate", HIGH: "High", CRITICAL: "Very high" };
+const BAND_RANK = { CRITICAL: 0, HIGH: 1, MEDIUM: 2, LOW: 3 };
+const CH_URL = num => `https://find-and-update.company-information.service.gov.uk/company/${num}`;
+
+// ── helpers ───────────────────────────────────────────────────────────────────
+const $ = (s, el = document) => el.querySelector(s);
+const esc = v => String(v ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const enc = v => encodeURIComponent(String(v ?? ""));
+const uniq = a => [...new Set(a)];
+const devBox = what => `<div class="devbox">${esc(what)}<br><span style="font-weight:500">Under development</span></div>`;
+const none = (msg = "None on record") => `<p class="empty">${esc(msg)}</p>`;
+
+function fmtDate(iso) {
+  if (!iso) return "—";
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso);
+  return m ? `${m[3]}/${m[2]}/${m[1]}` : esc(iso);
+}
+function fmtDateTime(iso) {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (isNaN(d)) return esc(iso);
+  return d.toLocaleString("en-GB", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
+}
+function money(v) {
+  if (v === null || v === undefined || v === "" || isNaN(+v)) return "Not stated";
+  const n = +v, a = Math.abs(n);
+  return "£" + (a >= 1e6 ? (n / 1e6).toFixed(1) + "m" : a >= 1e3 ? Math.round(n / 1e3) + "k" : Math.round(n).toLocaleString("en-GB"));
+}
+const num2 = v => (v === null || v === undefined || v === "" || v === 0) ? "Not stated" : Number(v).toLocaleString("en-GB");
+const band = b => `<span class="pill b-${esc(b || "UNKNOWN")}">${esc(BAND_LABEL[b] || b || "Unknown")}</span>`;
+const pol = p => ({ opportunity: '<span class="pill p-opp">Opportunity</span>', risk: '<span class="pill p-risk">Risk</span>', info: '<span class="pill p-info">Info</span>' }[p] || "");
+const link = (href, text) => `<a href="${esc(href)}" target="_blank" rel="noopener">${esc(text)}</a>`;
+const companyLink = (num, name) => `<a href="#/company/${enc(num)}">${esc(name)}</a>`;
+const kv = rows => `<dl class="kv">${rows.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${v}</dd></div>`).join("")}</dl>`;
+const card = (title, body, extra = "") => `<section class="card ${extra}"><h2>${esc(title)}</h2>${body}</section>`;
+const bars = (items, total) => items.map(i => {
+  const pct = total ? Math.max(3, Math.round(100 * i.value / total)) : 0;
+  return `<div class="barrow"><span class="lab" title="${esc(i.label)}">${esc(i.label)}</span><span class="track"><span class="fill ${i.cls || ""}" style="display:block;width:${pct}%"></span></span><span class="muted small">${i.value.toLocaleString("en-GB")}</span></div>`;
+}).join("") || none();
+
+// ── state ─────────────────────────────────────────────────────────────────────
+const S = {
+  companies: [], health: null, loadError: "", updated: "",
+  icp: { sectors: new Set(), regions: new Set() },
+  dash: { days: 30 },
+  co: { q: "", band: "", sector: "", region: "", status: "", sort: "score", shown: 200 },
+  sig: { days: 90, polarity: "", key: "", limit: 300 },
+  tq: "", tenders: [],
+  loaded: new Set()
+};
+
+async function api(path) {
+  const r = await fetch(API + path, { credentials: "include", headers: { Accept: "application/json" } });
+  if (!r.ok) throw new Error(`${r.status} from ${path}`);
+  return r.json();
+}
+const registerLoaded = prefixes => [...S.loaded].some(code => prefixes.some(p => code.startsWith(p)));
+function setStatus() {
+  const el = $("#status");
+  if (!S.health) { el.textContent = "Connecting…"; return; }
+  if (!S.health.ok) { el.innerHTML = `<span class="bad">Data not available</span>`; return; }
+  el.innerHTML = `<span class="ok">● Live data</span><br>Built ${fmtDateTime(S.health.builtAt)}`;
+}
+const showBanner = msg => { $("#banner").innerHTML = msg ? `<div class="err">${esc(msg)}</div>` : ""; };
+
+// ── boot ──────────────────────────────────────────────────────────────────────
+async function boot() {
+  try { S.health = await api("/api/health"); } catch (e) { S.health = { ok: false, error: e.message }; }
+  try {
+    const d = await api("/api/companies");
+    S.companies = d.companies || [];
+    S.updated = d.updated || "";
+  } catch (e) {
+    S.loadError = `Can't load companies: ${e.message}. Check that the data API is running.`;
+  }
+  S.loaded = new Set(S.companies.flatMap(c => c.registers || []));
+  setStatus();
+  window.addEventListener("hashchange", route);
+  route();
+}
+
+// ── routing ───────────────────────────────────────────────────────────────────
+function route() {
+  const [page = "", arg = ""] = location.hash.replace(/^#\/?/, "").split("/");
+  document.querySelectorAll("nav a[data-p]").forEach(a => a.classList.toggle("on", a.dataset.p === page));
+  const views = { "": viewDashboard, companies: viewCompanies, company: () => viewCompany(decodeURIComponent(arg)), signals: viewSignals, tenders: viewTenders, data: viewData };
+  const view = views[page] || viewDashboard;
+  showBanner(S.loadError && page !== "data" ? S.loadError : "");
+  window.scrollTo({ top: 0 });
+  $("#app").innerHTML = '<p class="empty">Loading…</p>';
+  Promise.resolve().then(view).catch(e => {
+    $("#app").innerHTML = `<div class="err">${esc(e.message)}</div>`;
+  });
+}
+function setApp(html) { $("#app").innerHTML = html; }
+
+// ── dashboard ─────────────────────────────────────────────────────────────────
+async function viewDashboard() {
+  const qs = new URLSearchParams({ days: String(S.dash.days) });
+  S.icp.sectors.forEach(s => qs.append("sector", s));
+  S.icp.regions.forEach(r => qs.append("region", r));
+  const d = await api("/api/dashboard?" + qs.toString());
+  const sectors = uniq(S.companies.map(c => c.sector)).filter(Boolean).sort();
+  const regions = uniq(S.companies.map(c => c.region)).filter(Boolean).sort();
+  const t = d.totals;
+  const focusOn = S.icp.sectors.size || S.icp.regions.size;
+
+  const tiles = [
+    [t.companies, "Companies"], [t.active, "Active"], [t[`signals${d.periodDays}d`], `Signals, ${d.periodDays} days`],
+    [t.opportunities, "Companies with opportunities"], [t.risks, "Companies at high risk"], [t.buyingWindows, "Buying windows (60 days)"],
+    [t.contractsEnding, "Contracts ending (9 months)"], [t.openTenders, "Open tenders"]
+  ];
+  const mixMax = d.signalMix.length ? Math.max(...d.signalMix.map(s => s.count)) : 0;
+  const mix = bars(d.signalMix.map(s => ({ label: s.label, value: s.count, cls: s.polarity === "opportunity" ? "g" : s.polarity === "risk" ? "r" : "s" })), mixMax);
+  const secMax = d.bySector.length ? Math.max(...d.bySector.map(s => s.companies)) : 0;
+  const regMax = d.byRegion.length ? Math.max(...d.byRegion.map(s => s.companies)) : 0;
+
+  setApp(`
+    <h1>Dashboard</h1>
+    <p class="sub">Signals from the public registers in the last ${d.periodDays} days. ${focusOn ? "Showing your focus only." : "Showing all companies."}</p>
+
+    <section class="card">
+      <div class="filters">
+        <label class="small muted">Period
+          <select data-dash="days">
+            ${[7, 30, 90, 365].map(n => `<option value="${n}" ${n === S.dash.days ? "selected" : ""}>${n === 365 ? "1 year" : n + " days"}</option>`).join("")}
+          </select>
+        </label>
+        ${focusOn ? '<button class="btn" data-clear-icp>Clear focus</button>' : ""}
+      </div>
+      <h2 style="margin-top:6px">Your focus: sectors</h2>
+      <div class="chips">${sectors.map(s => `<button class="chip ${S.icp.sectors.has(s) ? "on" : ""}" data-kind="sector" data-chip="${esc(s)}">${esc(s)}</button>`).join("")}</div>
+      <h2 style="margin-top:10px">Your focus: regions</h2>
+      <div class="chips">${regions.map(r => `<button class="chip ${S.icp.regions.has(r) ? "on" : ""}" data-kind="region" data-chip="${esc(r)}">${esc(r)}</button>`).join("")}</div>
+    </section>
+
+    <div class="grid k4 block">
+      ${tiles.map(([v, l]) => `<div class="card kpi"><div class="v">${(v ?? 0).toLocaleString("en-GB")}</div><div class="l">${esc(l)}</div></div>`).join("")}
+    </div>
+
+    <div class="grid two block">
+      ${card("Signal mix", mix)}
+      ${card("Where the activity is", `
+        <h2 class="muted small" style="margin-top:4px">By sector (companies)</h2>
+        ${bars(d.bySector.map(s => ({ label: s.name, value: s.companies })), secMax)}
+        <h2 class="muted small" style="margin-top:14px">By region (companies)</h2>
+        ${bars(d.byRegion.map(s => ({ label: s.name, value: s.companies })), regMax)}
+      `)}
+    </div>
+
+    <div class="grid two block">
+      ${card("Top opportunities", d.topOpportunities.length ? `<ul class="list">${d.topOpportunities.map(c => `
+        <li><div class="head" style="gap:8px"><strong>${companyLink(c.num, c.name)}</strong><span class="pill p-opp">Score ${c.opportunityScore}</span></div>
+        <div class="small muted">${esc(c.sector)} · ${esc(c.region || "Region not stated")}</div>
+        ${c.reason ? `<div class="small" style="margin-top:4px">${esc(c.reason)}</div>` : ""}</li>`).join("")}</ul>` : none("No opportunities in this period"))}
+      ${card("Risk alerts", d.riskAlerts.length ? `<ul class="list">${d.riskAlerts.map(c => `
+        <li><div class="head" style="gap:8px"><strong>${companyLink(c.num, c.name)}</strong>${band(c.riskBand)}</div>
+        <div class="small muted">${esc(c.reasons.join(" · ") || "Flagged on the registers")}</div></li>`).join("")}</ul>` : none("No high-risk companies"))}
+    </div>
+
+    <div class="block">
+      ${card("Latest signals", d.latestSignals.length ? `<div class="tw"><table>
+        <thead><tr><th>Date</th><th>Company</th><th>Signal</th><th>Detail</th></tr></thead>
+        <tbody>${d.latestSignals.map(s => `<tr class="row" data-go="#/company/${enc(s.num)}">
+          <td class="small muted" style="white-space:nowrap">${fmtDate(s.date)}</td>
+          <td>${esc(s.name)}</td>
+          <td>${pol(s.polarity)} <span class="small">${esc(s.label)}</span></td>
+          <td class="small">${esc(s.detail)}</td></tr>`).join("")}</tbody></table></div>` : none("No signals in this period"))}
+    </div>
+
+    <div class="grid two block">
+      ${card("Contracts ending soon", d.contractsEnding.length ? `<ul class="list">${d.contractsEnding.map(c => `
+        <li><div><strong>${companyLink(c.num, c.name)}</strong></div>
+        <div class="small muted">${esc(c.detail)}${c.daysUntil != null ? ` · ${c.daysUntil} days` : ""}</div></li>`).join("")}</ul>` : none("No contracts ending in the next 9 months"))}
+      ${card("Open tenders", d.openTenders.length ? `<div class="tw"><table>
+        <thead><tr><th>Title</th><th class="n">Value</th><th>Closes</th></tr></thead>
+        <tbody>${d.openTenders.map(t => `<tr><td>${t.url ? link(t.url, t.title || "Notice") : esc(t.title || "Notice")}<div class="small muted">${esc(t.buyer || "")}</div></td>
+          <td class="n">${money(t.value)}</td><td class="small" style="white-space:nowrap">${fmtDate(t.closes)}</td></tr>`).join("")}</tbody></table></div>` : none("No open tenders"))}
+    </div>
+
+    <div class="grid two block">
+      ${card("Register coverage", d.registers.length ? `<ul class="list">${d.registers.map(r => `<li class="stat-line"><span>${esc(r.name)} <span class="small muted">${esc(r.code)}</span></span><strong>${r.companies.toLocaleString("en-GB")}</strong></li>`).join("")}</ul>` : none("No registers loaded"))}
+      ${card("Not built yet", `<div class="stack">${NOT_BUILT.slice(0, 3).map(devBox).join("")}</div>`)}
+    </div>
+  `);
+}
+
+// ── companies ─────────────────────────────────────────────────────────────────
+function coFiltered() {
+  const { q, band: b, sector, region, status, sort } = S.co;
+  const qq = q.trim().toLowerCase();
+  const rows = S.companies.filter(c =>
+    (!qq || c.name.toLowerCase().includes(qq) || c.num.includes(qq) || (c.postcode || "").toLowerCase().includes(qq)) &&
+    (!b || c.riskBand === b) && (!sector || c.sector === sector) && (!region || c.region === region) && (!status || c.status === status));
+  const cmp = {
+    score: (a, c) => c.opportunityScore - a.opportunityScore,
+    risk: (a, c) => (BAND_RANK[a.riskBand] ?? 9) - (BAND_RANK[c.riskBand] ?? 9) || a.name.localeCompare(c.name),
+    name: (a, c) => a.name.localeCompare(c.name),
+    young: (a, c) => (a.age ?? 1e9) - (c.age ?? 1e9),
+    latest: (a, c) => (c.signals[0]?.date || "").localeCompare(a.signals[0]?.date || "")
+  }[sort];
+  return rows.sort(cmp);
+}
+function renderCoTable() {
+  const rows = coFiltered();
+  const part = rows.slice(0, S.co.shown);
+  $("#cotable").innerHTML = `
+    <p class="sub">${rows.length.toLocaleString("en-GB")} companies${rows.length > part.length ? ` · showing the first ${part.length.toLocaleString("en-GB")}` : ""}</p>
+    <div class="tw"><table>
+      <thead><tr><th>Company</th><th>Status</th><th>Sector · region</th><th>Risk</th><th class="n">Opportunity</th><th>Latest signal</th></tr></thead>
+      <tbody>${part.map(c => `<tr class="row" data-go="#/company/${enc(c.num)}">
+        <td><strong>${esc(c.name)}</strong><div class="small muted">${esc(c.num)}${c.city ? " · " + esc(c.city) : ""}</div></td>
+        <td class="small">${esc(c.status)}</td>
+        <td class="small">${esc(c.sector)}<div class="muted">${esc(c.region || "Region not stated")}</div></td>
+        <td>${band(c.riskBand)}</td>
+        <td class="n">${c.opportunityScore}</td>
+        <td class="small">${c.signals[0] ? `${esc(c.signals[0].label)}<div class="muted">${fmtDate(c.signals[0].date)}</div>` : '<span class="muted">None</span>'}</td>
+      </tr>`).join("")}</tbody></table></div>
+    ${rows.length > part.length ? `<div style="text-align:center;margin-top:12px"><button class="btn" data-more>Show 200 more</button></div>` : ""}`;
+}
+function viewCompanies() {
+  const opts = (key, label) => `<select data-co="${key}"><option value="">${label}</option>${uniq(S.companies.map(c => c[key === "band" ? "riskBand" : key])).filter(Boolean).sort().map(v => `<option value="${esc(v)}" ${S.co[key] === v ? "selected" : ""}>${esc(key === "band" ? (BAND_LABEL[v] || v) : v)}</option>`).join("")}</select>`;
+  setApp(`
+    <h1>Companies</h1>
+    <p class="sub">Every company on the registers, with its risk band and opportunity score.</p>
+    <section class="card">
+      <div class="filters">
+        <input type="search" placeholder="Search name, number or postcode" value="${esc(S.co.q)}" data-co="q" aria-label="Search">
+        ${opts("band", "All risk bands")}
+        ${opts("sector", "All sectors")}
+        ${opts("region", "All regions")}
+        ${opts("status", "All statuses")}
+        <select data-co="sort" aria-label="Sort">
+          ${[["score", "Highest opportunity"], ["risk", "Highest risk first"], ["latest", "Latest signal"], ["young", "Youngest first"], ["name", "Name A–Z"]].map(([v, l]) => `<option value="${v}" ${S.co.sort === v ? "selected" : ""}>${l}</option>`).join("")}
+        </select>
+      </div>
+      <div id="cotable"></div>
+    </section>`);
+  renderCoTable();
+}
+
+// ── company detail ────────────────────────────────────────────────────────────
+async function viewCompany(num) {
+  let c = S.companies.find(x => x.num === num);
+  if (!c) c = await api("/api/companies/" + enc(num));
+  const regs = (c.registers || []).map(code => REGISTER_NAMES[code] || code).join(", ") || "None";
+  const cqcOn = registerLoaded(["CQC-"]);
+  const sponsorOn = registerLoaded(["HOS-"]);
+  const contractsOn = registerLoaded(["CON-", "FTS-"]);
+  const paymentsOn = registerLoaded(["PTR-"]);
+  const gazetteOn = registerLoaded(["INS-", "GAZ-"]);
+  const hmrcOn = registerLoaded(["HMD-"]);
+  const website = c.website && !c.website.includes("company-information.service.gov.uk") ? c.website : "";
+
+  setApp(`
+    <a class="back" href="#/companies">← Companies</a>
+    <section class="card">
+      <div class="head">
+        <div style="min-width:0">
+          <h1>${esc(c.name)}</h1>
+          <div class="muted">${esc(c.num)} · ${esc(c.type || "")} · <span class="pill ${c.status === "Active" ? "p-opp" : "p-risk"}">${esc(c.status)}</span></div>
+          <div class="muted small" style="margin-top:6px">${esc(c.address || "Address not stated")}</div>
+        </div>
+        <div class="scores">
+          <div class="score"><div class="n">${c.opportunityScore}</div><div class="t">Opportunity (1–99)</div></div>
+          <div class="score"><div style="margin:6px 0">${band(c.riskBand)}</div><div class="t">${esc(c.riskBandRaw || "Risk band")}</div></div>
+        </div>
+      </div>
+    </section>
+
+    <div class="grid two block">
+      ${card("Company", kv([
+        ["Incorporated", esc(c.incorporated || "Not stated")],
+        ["Age", c.age != null ? `${c.age} years` : "Not stated"],
+        ["Sector", esc(c.sector || "Not stated")],
+        ["SIC codes", esc((c.sics || []).join(", ") || "Not stated")],
+        ["Region", esc(c.region || "Not stated")],
+        ["City", esc(c.city || "Not stated")],
+        ["Postcode", esc(c.postcode || "Not stated")],
+        ["Active directors", String(c.directorCount ?? 0)],
+        ["Registers", esc(regs)],
+        ["Website", website ? link(website, website) : link(CH_URL(c.num), "Companies House record")],
+        ["Companies House", link(CH_URL(c.num), "View on Companies House")],
+        ["Data built", fmtDateTime(c.fetchedAt)]
+      ]))}
+      ${card("Risk", `
+        <div class="head" style="gap:8px;margin-bottom:8px">${band(c.riskBand)}<span class="small muted">${esc(c.riskBandRaw || "")}</span></div>
+        ${c.riskReasons && c.riskReasons.length
+          ? `<ul class="list">${c.riskReasons.map(r => `<li class="small">${esc(r)}</li>`).join("")}</ul>`
+          : none("No risk flags on the registers")}
+        <p class="note">Risk band is Reckonant's own calculation from the registers (see README).</p>`)}
+    </div>
+
+    <div class="block">
+      ${card("Signals (last year)", c.signals.length ? `<ul class="list">${c.signals.map(s => `
+        <li><div class="head" style="gap:8px;justify-content:flex-start">${pol(s.polarity)} <strong>${esc(s.title || s.label)}</strong> <span class="small muted">${fmtDate(s.date)}</span></div>
+        <div class="small" style="margin-top:4px">${esc(s.detail)}</div>
+        <div class="small muted">${esc(s.source || "")}${s.url ? " · " + link(s.url, "source") : ""}</div></li>`).join("")}</ul>`
+        : none("No signals in the last year"))}
+    </div>
+
+    <div class="block">
+      ${card("Officers", c.officers && c.officers.length ? `<div class="tw"><table>
+        <thead><tr><th>Name</th><th>Role</th><th>Nationality</th><th>Appointed</th><th>Status</th></tr></thead>
+        <tbody>${c.officers.map(o => `<tr><td>${esc(o.name)}</td><td class="small">${esc(o.role)}</td><td class="small">${esc(o.nationality || "—")}</td>
+          <td class="small">${esc(o.appointedOn ? fmtDate(o.appointedOn) : o.appointed || "—")}</td>
+          <td class="small">${o.active ? '<span class="pill p-opp">Active</span>' : `<span class="pill p-info">Resigned ${fmtDate(o.resignedOn)}</span>`}</td></tr>`).join("")}</tbody></table></div>
+        <p class="note">Occupation and date of birth: <span class="dev">Under development</span></p>` : none("No officers on record"))}
+    </div>
+
+    <div class="grid two block">
+      ${card("Owners with significant control", c.pscs && c.pscs.length ? `<ul class="list">${c.pscs.map(p => `<li><strong>${esc(p.name)}</strong>
+        <div class="small muted">${esc(p.kind)} · ${esc(p.control)} · notified ${fmtDate(p.notifiedOn)}</div></li>`).join("")}</ul>` : none("No current owners on record"))}
+      ${card("Financials", c.financialsFiled ? kv([
+          ["Latest year", String(c.latest?.year ?? "—")],
+          ["Turnover", money(c.latest?.revenue)],
+          ["Employees", num2(c.employees)],
+          ["Net assets", money(c.latest?.netAssets)]
+        ]) : devBox("Turnover, profit, employees, ratios, charges and CCJs"))}
+    </div>
+
+    <div class="block">
+      ${card("CQC locations", !cqcOn ? devBox("CQC care directory") : !c.cqc ? none("No CQC locations for this company") : `
+        <div class="tiles">
+          <div class="tile"><div class="v">${c.cqc.locations}</div><div class="l">Locations</div></div>
+          <div class="tile"><div class="v">${c.cqc.careHomes}</div><div class="l">Care homes</div></div>
+          <div class="tile"><div class="v">${c.cqc.beds}</div><div class="l">Beds</div></div>
+          <div class="tile"><div class="v">${Object.entries(c.cqc.ratings || {}).map(([r, n]) => `${n} ${esc(r)}`).join(", ") || "Not rated"}</div><div class="l">Ratings</div></div>
+        </div>
+        <div class="tw"><table>
+          <thead><tr><th>Location</th><th>Rating</th><th class="n">Beds</th><th>City</th><th>Published</th></tr></thead>
+          <tbody>${c.cqc.list.map(l => `<tr><td>${esc(l.name)}<div class="small muted">${esc(l.type || "")}</div></td>
+            <td>${esc(l.rating || "Not rated")}</td><td class="n">${l.beds || "—"}</td><td class="small">${esc(l.city)}<div class="muted">${esc(l.postcode)}</div></td>
+            <td class="small">${fmtDate(l.published)}</td></tr>`).join("")}</tbody></table></div>`)}
+    </div>
+
+    <div class="grid two block">
+      ${card("Home Office sponsor licence", !sponsorOn ? devBox("Home Office sponsor register") : !c.sponsor
+          ? none("Not on the Home Office sponsor register")
+          : kv([["On register", c.sponsor.onRegister ? "Yes" : "No"], ["Rating", esc(c.sponsor.rating || "Not stated")],
+                ["Route", esc(c.sponsor.route || "Not stated")], ["First seen", fmtDate(c.sponsor.firstSeen)], ["Last seen", fmtDate(c.sponsor.lastSeen)]]))}
+      ${card("Payments (public sector)", !paymentsOn ? devBox("Payments Transparency") :
+        kv([["Payments", String(c.payments?.count ?? 0)], ["Total", money(c.payments?.total)], ["Last payment", fmtDate(c.payments?.last)]]))}
+    </div>
+
+    <div class="grid two block">
+      ${card("Public contracts", !contractsOn ? devBox("Contracts Finder and Find a Tender") : c.contracts.length ? `<div class="tw"><table>
+        <thead><tr><th>Contract</th><th class="n">Value</th><th>Ends</th></tr></thead>
+        <tbody>${c.contracts.map(k => `<tr><td>${k.url ? link(k.url, k.title || "Contract") : esc(k.title || "Contract")}<div class="small muted">${esc(k.buyer)}</div></td>
+          <td class="n">${money(k.value)}</td><td class="small" style="white-space:nowrap">${fmtDate(k.end)}</td></tr>`).join("")}</tbody></table></div>` : none("No public contracts on record"))}
+      ${card("Insolvency notices (Gazette)", !gazetteOn ? devBox("Gazette") : c.gazette.length ? `<ul class="list">${c.gazette.map(g => `<li><strong>${esc(g.kind || g.type || "Notice")}</strong>
+        <div class="small muted">${fmtDate(g.date)} ${g.url ? "· " + link(g.url, "notice") : ""}</div></li>`).join("")}</ul>` : none("No Gazette notices on record"))}
+    </div>
+
+    <div class="grid two block">
+      ${card("HMRC tax defaulters", !hmrcOn ? devBox("HMRC tax defaulters") : c.hmrc.length ? `<ul class="list">${c.hmrc.map(h => `<li><strong>${h.stillListed ? "Still listed" : "No longer listed"}</strong>
+        <div class="small muted">Listed ${fmtDate(h.firstListed)} · ${esc(h.period || "")} · tax ${esc(h.tax || "—")} · penalties ${esc(h.penalties || "—")}</div></li>`).join("")}</ul>` : none("Not on the HMRC defaulters list"))}
+      ${card("Decision makers", devBox("Decision-maker contacts (switched off in the app)"))}
+    </div>
+  `);
+}
+
+// ── signals ───────────────────────────────────────────────────────────────────
+async function viewSignals() {
+  const qs = new URLSearchParams({ days: String(S.sig.days), limit: String(S.sig.limit) });
+  if (S.sig.polarity) qs.set("polarity", S.sig.polarity);
+  if (S.sig.key) qs.set("key", S.sig.key);
+  const d = await api("/api/signals?" + qs.toString());
+  const rows = d.signals || [];
+  setApp(`
+    <h1>Signals</h1>
+    <p class="sub">Every signal across all companies, newest first (up to ${S.sig.limit}).</p>
+    <section class="card">
+      <div class="filters">
+        <select data-sig="days" aria-label="Period">${[30, 90, 365].map(n => `<option value="${n}" ${n === S.sig.days ? "selected" : ""}>${n === 365 ? "1 year" : n + " days"}</option>`).join("")}</select>
+        <select data-sig="polarity" aria-label="Type">
+          <option value="">All types</option>
+          <option value="opportunity" ${S.sig.polarity === "opportunity" ? "selected" : ""}>Opportunities</option>
+          <option value="risk" ${S.sig.polarity === "risk" ? "selected" : ""}>Risks</option>
+          <option value="info" ${S.sig.polarity === "info" ? "selected" : ""}>Information</option>
+        </select>
+        <select data-sig="key" aria-label="Signal">
+          <option value="">All signals</option>
+          ${Object.entries(SIGNAL_LABELS).map(([k, l]) => `<option value="${k}" ${S.sig.key === k ? "selected" : ""}>${esc(l)}</option>`).join("")}
+        </select>
+        <span class="small muted">${rows.length.toLocaleString("en-GB")} shown</span>
+      </div>
+      ${rows.length ? `<div class="tw"><table>
+        <thead><tr><th>Date</th><th>Company</th><th>Signal</th><th>Detail</th></tr></thead>
+        <tbody>${rows.map(s => `<tr class="row" data-go="#/company/${enc(s.num)}">
+          <td class="small muted" style="white-space:nowrap">${fmtDate(s.date)}</td>
+          <td>${esc(s.name)}<div class="small muted">${esc(s.sector || "")}</div></td>
+          <td>${pol(s.polarity)} <span class="small">${esc(s.label)}</span></td>
+          <td class="small">${esc(s.detail)}</td></tr>`).join("")}</tbody></table></div>` : none("No signals match these filters")}
+    </section>`);
+}
+
+// ── tenders ───────────────────────────────────────────────────────────────────
+async function viewTenders() {
+  const d = await api("/api/tenders");
+  S.tenders = d.tenders || [];
+  setApp(`
+    <h1>Open tenders</h1>
+    <p class="sub">Open notices from Find a Tender and Contracts Finder.</p>
+    <section class="card">
+      <div class="filters"><input type="search" placeholder="Search title or buyer" value="${esc(S.tq)}" data-tq aria-label="Search tenders"><span class="small muted" id="tcount"></span></div>
+      <div id="trows"></div>
+    </section>`);
+  renderTenderRows();
+}
+function renderTenderRows() {
+  const q = S.tq.trim().toLowerCase();
+  const rows = (S.tenders || []).filter(t => !q || `${t["Title"] || ""} ${t["Buyer"] || ""}`.toLowerCase().includes(q));
+  const counter = $("#tcount"); if (counter) counter.textContent = `${rows.length.toLocaleString("en-GB")} notices`;
+  $("#trows").innerHTML = rows.length ? `<div class="tw"><table>
+    <thead><tr><th>Title</th><th>Buyer</th><th>Region</th><th class="n">Value</th><th>Closes</th><th>SME suitable</th></tr></thead>
+    <tbody>${rows.map(t => `<tr>
+      <td>${t.url ? link(t.url, t["Title"] || "Notice") : esc(t["Title"] || "Notice")}<div class="small muted">${esc(t["Release ID"] || "")}</div></td>
+      <td class="small">${esc(t["Buyer"] || "Not stated")}${t["Buyer town"] ? `<div class="muted">${esc(t["Buyer town"])}</div>` : ""}</td>
+      <td class="small">${esc(t["Region"] || "Not stated")}</td>
+      <td class="n">${money(t["Value"])}</td>
+      <td class="small" style="white-space:nowrap">${fmtDate(t["Tender end"])}</td>
+      <td class="small">${t["SME suitable"] === true || t["SME suitable"] === "Yes" ? "Yes" : t["SME suitable"] === false || t["SME suitable"] === "No" ? "No" : "Not stated"}</td>
+    </tr>`).join("")}</tbody></table></div>` : none("No open tenders match");
+}
+
+// ── data status ───────────────────────────────────────────────────────────────
+function viewData() {
+  const h = S.health || {};
+  const rows = Object.keys(REGISTER_NAMES).map(code => {
+    const count = S.companies.filter(c => (c.registers || []).includes(code)).length;
+    return { code, name: REGISTER_NAMES[code], count, loaded: count > 0 };
+  });
+  setApp(`
+    <h1>Data</h1>
+    <p class="sub">Where the numbers come from, and which registers are loaded.</p>
+    <div class="grid two">
+      ${card("Data service", kv([
+        ["Status", h.ok ? '<span class="ok">Live</span>' : `<span class="bad">Not available</span>`],
+        ["Companies loaded", (h.companies ?? S.companies.length).toLocaleString("en-GB")],
+        ["Built", fmtDateTime(h.builtAt || S.updated)],
+        ["Build time", h.buildSeconds != null ? `${h.buildSeconds} seconds` : "Not stated"],
+        ["Source", "Signals Feeder Engine"]
+      ]) + (h.error ? `<p class="err block">${esc(h.error)}</p>` : ""))}
+      ${card("Not built yet", `<div class="stack">${NOT_BUILT.map(devBox).join("")}</div>`)}
+    </div>
+    <section class="card block">
+      <h2>Registers</h2>
+      <div class="tw"><table>
+        <thead><tr><th>Code</th><th>Register</th><th class="n">Companies</th><th>Status</th></tr></thead>
+        <tbody>${rows.map(r => `<tr><td class="small muted">${esc(r.code)}</td><td>${esc(r.name)}</td><td class="n">${r.count.toLocaleString("en-GB")}</td>
+          <td>${r.loaded ? '<span class="pill p-opp">Loaded</span>' : '<span class="dev">Under development</span>'}</td></tr>`).join("")}</tbody></table></div>
+    </section>`);
+}
+
+// ── events (delegated) ────────────────────────────────────────────────────────
+document.addEventListener("click", e => {
+  const chip = e.target.closest("[data-chip]");
+  if (chip) {
+    const set = chip.dataset.kind === "sector" ? S.icp.sectors : S.icp.regions;
+    const v = chip.dataset.chip;
+    set.has(v) ? set.delete(v) : set.add(v);
+    route(); return;
+  }
+  if (e.target.closest("[data-clear-icp]")) { S.icp.sectors.clear(); S.icp.regions.clear(); route(); return; }
+  if (e.target.closest("[data-more]")) { S.co.shown += 200; renderCoTable(); return; }
+  const go = e.target.closest("[data-go]");
+  if (go && !e.target.closest("a")) location.hash = go.dataset.go;
+});
+document.addEventListener("change", e => {
+  const f = e.target;
+  if (f.dataset.dash === "days") { S.dash.days = +f.value; route(); }
+  else if (f.dataset.sig) { S.sig[f.dataset.sig] = f.value; route(); }
+  else if (f.dataset.co && f.tagName === "SELECT") { S.co[f.dataset.co] = f.value; S.co.shown = 200; renderCoTable(); }
+});
+document.addEventListener("input", e => {
+  const f = e.target;
+  if (f.dataset.co === "q") { S.co.q = f.value; S.co.shown = 200; renderCoTable(); }
+  if (f.dataset.tq !== undefined) { S.tq = f.value; renderTenderRows(); }
+});
+
+boot();
+</script>
+</body>
+</html>

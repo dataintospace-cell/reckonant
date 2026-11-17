@@ -1,0 +1,8 @@
+# Python 3.10 or newer
+psycopg[binary]>=3.1
+fastapi>=0.110
+uvicorn[standard]>=0.27
+streamlit>=1.35
+pandas>=2.0
+requests>=2.31
+httpx>=0.27        # only for the tests (FastAPI's test client)

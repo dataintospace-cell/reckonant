@@ -46,7 +46,7 @@ STEPS = [
     ("company",   "Company master (Companies House)",                "register_company_master.py",  ["--limit", "1500"],         240),
     ("mapping",   "Company number / name columns",                   "register_company_columns.py", [],                            5),
     ("accounts",  "Companies House bulk accounts",                   "register_financials.py",      ACCOUNTS_ARGS,               180),
-    ("financials","Company financials",                              "register_financials.py",      ["--limit", "600"],          120),
+    ("financials","Company financials",                              "register_financials.py",      ["--limit", "600"],          240),
     ("columns",   "Register columns workbook",                       "export_register_columns.py",  [],                           30),
     ("api",       "Reckonant API reload",                            None,                          [],                           10),
 ]
